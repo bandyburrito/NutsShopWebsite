@@ -1,67 +1,109 @@
-# Kernel & Co. — Nut shop website
+# Kernel & Co.
 
-A small, static-feeling Next.js + Tailwind site for a nut wholesale/retail business.
+A small-batch nut shop website — built with Next.js, TypeScript, and Tailwind CSS.
 
-## What's inside
+The site sells 100g packets of cashews, pistachios, and almonds, sourced from single growers and packed by hand. It targets two audiences: walk-in online customers and wholesale buyers (hotels, bars, restaurants).
+
+> 🚧 Currently in **pre-launch mode**. Online checkout is disabled while the business gets set up; visitors can browse and join a notify-me list. Flipping a single config value enables the full e-commerce flow.
+
+---
+
+## What's in it
+
+- **Marketing pages** — homepage with hero, brand story, and "who it's for" sections
+- **Three product pages** — each with origin, sourcing notes, and a paper-label-styled illustration (real photos slot in when available)
+- **About / Story** page
+- **Contact** page with email form
+- **Wholesale inquiry** page with B2B pricing tiers and quote form
+- **Cart system** — drawer-style basket with localStorage persistence
+- **Stripe Checkout** — server-side session creation, CHF currency, Swiss shipping, VAT-inclusive pricing
+- **Webhook endpoint** — handles `checkout.session.completed` and related events
+- **Pre-launch mode** — a one-line toggle that hides checkout and shows a "launching soon" section with email signup
+- **Hidden admin route** — view the notify-me list locally with a secret key
+
+---
+
+## Tech
+
+| Layer | Stack |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + custom design tokens |
+| Payments | Stripe (test mode by default) |
+| State | React Context + localStorage |
+| Forms | Server Actions |
+| Hosting | Vercel-ready |
+
+No database. Notify-me signups are stored in a local JSON file during pre-launch; this gets swapped for a proper email service (Resend / Mailchimp) before going live.
+
+---
+
+## Design
+
+Warm, rustic, artisan-shop feel — meant to evoke a hand-stamped paper bag rather than a glossy e-commerce site. The palette is built around cream, clay, terracotta, and a deep roasted brown, with a subtle paper-grain texture overlaid on most sections. Typography pairs Fraunces (serif, for headings and accents) with Inter Tight (sans, for body text).
+
+Buttons use a "stamp" treatment — hard edges, drop shadow on hover, no rounded corners. Section dividers use small dots and minimal lines instead of heavy borders.
+
+---
+
+## Pre-launch vs live mode
+
+One file controls the entire site's behavior: `src/lib/launch-mode.ts`.
+
+```ts
+export const LAUNCH_MODE: LaunchMode = "preLaunch";
+```
+
+Change `"preLaunch"` to `"live"` to:
+- Hide the launching-soon banner and homepage section
+- Re-enable real Stripe checkout
+- Switch all "Notify me at launch" buttons to "Add to basket"
+
+This means the same codebase serves both stages with no branching or feature flags scattered across files.
+
+---
+
+## Project structure
 
 ```
 src/
 ├── app/
-│   ├── page.tsx               ← Homepage
-│   ├── layout.tsx             ← Wraps every page (header + footer)
-│   ├── globals.css            ← Colors, fonts, custom styles
-│   ├── about/page.tsx         ← Brand story
-│   ├── contact/page.tsx       ← Contact form
-│   ├── wholesale/page.tsx     ← B2B inquiry page (hotels/bars)
-│   └── products/
-│       ├── cashews/page.tsx
-│       ├── pistachios/page.tsx
-│       └── almonds/page.tsx
-└── components/
-    ├── Header.tsx
-    ├── Footer.tsx
-    └── ProductPage.tsx        ← Reused by all 3 product pages
+│   ├── page.tsx                    Homepage
+│   ├── layout.tsx                  Shared layout (header, footer, cart provider)
+│   ├── about/                      Brand story
+│   ├── contact/                    Contact form
+│   ├── wholesale/                  B2B inquiry page
+│   ├── products/                   Cashews, pistachios, almonds
+│   ├── checkout/                   Stripe success and cancelled pages
+│   ├── admin/notify-list/          Email signup admin (key-protected)
+│   ├── actions/                    Server actions: checkout, notify
+│   └── api/webhooks/stripe/        Stripe webhook handler
+├── components/                     Header, footer, cart, product page, forms
+└── lib/
+    ├── launch-mode.ts              The one-line mode toggle
+    ├── products.ts                 Product catalog (single source of truth)
+    ├── stripe.ts                   Server-only Stripe client
+    └── cart-context.tsx            Cart state with localStorage sync
 ```
 
-## Run it
+---
 
-You'll need Node.js installed. On Linux it's usually:
+## Running it locally
 
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for full setup instructions, environment variables, Stripe test mode, and the launch checklist.
+
+The short version:
 ```bash
-sudo apt install nodejs npm
-# or use nvm — recommended: https://github.com/nvm-sh/nvm
+npm install
+cp .env.local.example .env.local
+npm run dev
 ```
 
-Then in this folder:
+Then open `http://localhost:3000`. During pre-launch mode no Stripe keys are required.
 
-```bash
-npm install      # downloads dependencies (one-time)
-npm run dev      # starts the dev server
-```
+---
 
-Open http://localhost:3000 in your browser.
+## Status
 
-## How to change stuff (cheat sheet for poopy-kaki brain)
-
-**Want to change a color?** → `tailwind.config.js` has all the warm/rustic colors named. Change `terracotta`, `clay`, `roast`, etc. once and they update everywhere.
-
-**Want to change the text on the homepage?** → `src/app/page.tsx`. Just look for the words you want to change and edit them.
-
-**Want to add a 4th product?**
-1. Make a new folder: `src/app/products/walnuts/`
-2. Add `page.tsx` inside it (copy from `cashews/page.tsx` and edit the values)
-3. Add it to the menu in `src/components/Header.tsx`
-
-**Want to change the fonts?** → top of `src/app/globals.css`. The `@import url(...)` line pulls in Google Fonts. Pick others from fonts.google.com.
-
-**Want to make the contact form actually send emails?** → Right now it just shows a success message. Look up "Formspree" or "Resend" — both are easy to wire up later.
-
-## Things still to do (when ready)
-
-- [ ] Real photos of the nuts (the SVG illustrations are placeholders)
-- [ ] Real prices, real phone, real email, real address
-- [ ] Real grower/origin stories (the about page has placeholder copy)
-- [ ] Wire up the forms to actually send mail
-- [ ] Buy a domain, deploy to Vercel (free, takes 5 min)
-- [ ] Add legal pages: privacy, terms, allergen info, food safety cert
-# Test edit
+🚧 Work in progress. The site is functional but still has placeholder content (product photos, business contact details, real prices, legal pages). See `DEVELOPMENT.md` for the launch checklist.
