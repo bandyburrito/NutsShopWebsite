@@ -64,3 +64,4 @@ Open http://localhost:3000 in your browser.
 - [ ] Wire up the forms to actually send mail
 - [ ] Buy a domain, deploy to Vercel (free, takes 5 min)
 - [ ] Add legal pages: privacy, terms, allergen info, food safety cert
+# Test edit
